@@ -1,7 +1,9 @@
+# Note to self: I needed to be in Python 3.9 for BeautifulSoup/bs4 to work and not have a ModuleNotFoundError that might be a me problem for now though
 # Source: https://realpython.com/python-web-scraping-practical-introduction/
 
 from urllib.request import urlopen
 import re
+from bs4 import BeautifulSoup
 
 # --------- Helper Functions --------- #
 def get_html_from_url(url: str):
@@ -89,12 +91,150 @@ def section_1():
     # it just stops at the first > it sees bc it wants the shortest match
 
 def section_2():
+    """
+    More involved HTML parsing (involving .find() and regex)
+    """
+
+    # My solution (gets all of the titles for multiple title tags)
+    url = "http://olympus.realpython.org/profiles/poseidon"
+    html = get_html_from_url(url)
+
+    # Use regular expressions to parse the title
+    starting_tag_regex = "<\\s?title\\s?>"
+    ending_tag_regex = "</\\s?title\\s?>"
+
+    match_results = re.findall(f"{starting_tag_regex}.*{ending_tag_regex}", html)
+
+    titles = []
+    for match in match_results:
+        parsed_title = re.sub("<.*?>", "", match)
+        titles.append(parsed_title)
+
+    # print(titles)
+
+    # Real Python's solution
+    url = "http://olympus.realpython.org/profiles/dionysus"
+    page = urlopen(url)
+    html = page.read().decode("utf-8")
+
+    pattern = "<title.*?>.*?</title.*?>"
+    match_results = re.search(pattern, html, re.IGNORECASE)
+    title = match_results.group()
+    title = re.sub("<.*?>", "", title) # Remove HTML tags
+
+    # print(title)
+
+    # My answer for the "Check Your Understanding"
+    # I mean I don't know if this works, but it doesn't use .find()?
+    url = "http://olympus.realpython.org/profiles/dionysus"
+    html = get_html_from_url(url)
+
+    pattern = "Name:\\s.*</"
+    match_results = re.search(pattern, html, re.IGNORECASE)
+    name = match_results.group()
+    name = re.sub("Name:\\s", "", name)
+    name = re.sub("</", "", name)
+
+    pattern = "Favorite Color:\\s.*"
+    match_results = re.search(pattern, html, re.IGNORECASE)
+    favorite_color = match_results.group()
+    favorite_color = re.sub("Favorite Color:\\s", "", favorite_color)
+    favorite_color = re.sub("</", "", favorite_color)
+
+    print(name)
+    print(favorite_color)
+
+    # Intended solution for the "Check Your Understanding"
+    url = "http://olympus.realpython.org/profiles/dionysus"
+    html_page = urlopen(url)
+    html_text = html_page.read().decode("utf-8")
+
+    for string in ["Name: ", "Favorite Color:"]:
+        string_start_idx = html_text.find(string)
+        text_start_idx = string_start_idx + len(string)
+
+        next_html_tag_offset = html_text[text_start_idx:].find("<")
+        text_end_idx = text_start_idx + next_html_tag_offset
+
+        raw_text = html_text[text_start_idx : text_end_idx]
+        clean_text = raw_text.strip(" \r\n\t")
+        print(clean_text)
+
+def section_3():
+    """
+    Opening and parsing HTML using BeautifulSoup
+    """
+
+    # Opening a page with BeautifulSoup
+    url = "http://olympus.realpython.org/profiles/dionysus"
+    page = urlopen(url)
+    html = page.read().decode("utf-8")
+
+    # "html.parser" is the chosen parser for now and is Python's built-in HTML parser
+    soup = BeautifulSoup(html, "html.parser")
+
+    # I guess this can be run in the interactive window but I haven't been able to run the interactice window as of right now
+    text = soup.get_text()
+
+    # Remove newlines with .replace()
+    # text = text.replace("\n\n", "\n")
+
+    # Remove newlines with regular expressions
+    # + in regex means one or more I think
+    # text = re.sub("(\\n)+", "\\n", text)
+
+    # print(text)
+
+    # Get all URLs from the <img> tags
+    img_tags = soup.find_all("img")
+    # print(img_tags)
+
+    # Each element in ^^ img_tags is a Tag object
+    image1, image2 = soup.find_all("img")
+    # print(image1.name)
+
+    # Specifying the value of the HTML attribute
+    specific_img_src = soup.find_all("img", src="/static/dionysus.jpg")
+    # print(specific_img_src)
+    
+    # We can access HTML attributes like key-value pairs in a dictionary
+    # print(image1["src"])
+    # print(image2["src"])
+
+    # Title tag in a document
+    # print(soup.title)
+    # print(soup.title.string)
+
+    # My answer for the "Check Your Understanding"
+    # I see my issue is I didn't concatenate the hrefs with the base URL!
+    url = "http://olympus.realpython.org/profiles"
+    page = urlopen(url)
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+
+    a_tags = soup.find_all("a")
+    for a_tag in a_tags:
+        print(a_tag["href"])
+    
+    # Intended solution for the "Check Your Understanding"
+    base_url = "http://olympus.realpython.org"
+    html_page = urlopen(base_url + "/profiles")
+    html_text = html_page.read().decode("utf-8")
+    soup = BeautifulSoup(html_text, "html.parser")
+
+    for link in soup.find_all("a"):
+        link_url = base_url + link["href"]
+        print(link_url)
+
+def section_4():
     pass
 
 # ------------------------------------ #
 
 def main():
     # section_1()
-    section_2()
+    # section_2()
+    # section_3()
+    section_4()
 
 main()
