@@ -314,6 +314,10 @@ def section_4():
     print(profiles_page.soup.title)
 
 def section_5():
+    """
+    Calling web pages in real-time
+    """
+
     browser = mechanicalsoup.Browser()
 
     # Print the result of the dice 4 times after 10 seconds (rerolls the dice each time the page is loaded)
