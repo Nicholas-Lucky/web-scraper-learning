@@ -7,6 +7,7 @@ from urllib.request import urlopen
 import re
 from bs4 import BeautifulSoup
 import mechanicalsoup
+import time
 
 # --------- Helper Functions --------- #
 def get_html_from_url(url: str):
@@ -313,7 +314,19 @@ def section_4():
     print(profiles_page.soup.title)
 
 def section_5():
-    pass
+    browser = mechanicalsoup.Browser()
+
+    # Print the result of the dice 4 times after 10 seconds (rerolls the dice each time the page is loaded)
+    for i in range(4):
+        url = "http://olympus.realpython.org/dice"
+        page = browser.get(url)
+        html = page.soup
+
+        tag = html.select("#result")[0]
+        print(tag.text)
+
+        if i < 3:
+            time.sleep(10)
 
 # ------------------------------------ #
 
@@ -322,6 +335,8 @@ def main():
     # section_2()
     # section_3()
     # section_4()
-    section_5()
+    # section_5()
+
+    pass
 
 main()
