@@ -230,6 +230,10 @@ def section_3():
         print(link_url)
 
 def section_4():
+    """
+    Browsing through a web page using MechanicalSoup
+    """
+
     # vv this can be used to browse through a page through code??? 
     browser = mechanicalsoup.Browser()
 
@@ -278,12 +282,38 @@ def section_4():
         # print(f"{text}: {address}")
 
     # My answer for the "Check Your Understanding"
-    pass
+    browser = mechanicalsoup.Browser()
+    url = "http://olympus.realpython.org/login"
+    page = browser.get(url)
+    html = page.soup
+
+    username = "zeus"
+    password = "ThunderDude"
+
+    form = html.select("form")[0]
+    form.select("input")[0]["value"] = username
+    form.select("input")[1]["value"] = password
+
+    profiles_page = browser.submit(form, page.url)
+    profiles_page_html = profiles_page.soup
+    print(profiles_page_html.title)
     
     # Intended solution for the "Check Your Understanding"
+    browser = mechanicalsoup.Browser()
 
+    login_url = "http://olympus.realpython.org/login"
+    login_page = browser.get(login_url)
+    login_html = login_page.soup
 
+    form = login_html.form
+    form.select("input")[0]["value"] = "zeus"
+    form.select("input")[1]["value"] = "ThunderDude"
 
+    profiles_page = browser.submit(form, login_page.url)
+    print(profiles_page.soup.title)
+
+def section_5():
+    pass
 
 # ------------------------------------ #
 
@@ -291,6 +321,7 @@ def main():
     # section_1()
     # section_2()
     # section_3()
-    section_4()
+    # section_4()
+    section_5()
 
 main()
