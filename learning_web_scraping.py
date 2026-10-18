@@ -1,9 +1,12 @@
 # Note to self: I needed to be in Python 3.9 for BeautifulSoup/bs4 to work and not have a ModuleNotFoundError that might be a me problem for now though
+# I don't know if this also applies to MechanicalSoup ^^
+
 # Source: https://realpython.com/python-web-scraping-practical-introduction/
 
 from urllib.request import urlopen
 import re
 from bs4 import BeautifulSoup
+import mechanicalsoup
 
 # --------- Helper Functions --------- #
 def get_html_from_url(url: str):
@@ -227,7 +230,60 @@ def section_3():
         print(link_url)
 
 def section_4():
+    # vv this can be used to browse through a page through code??? 
+    browser = mechanicalsoup.Browser()
+
+    url = "http://olympus.realpython.org/login"
+    page = browser.get(url)
+
+    # page is a Response object
+    # 200 status code = successful
+    # 404 status code = URL doesn't exist
+    # 500 status code = server error
+    # print(page)
+
+    # MechanicalSoup uses BeautifulSoup
+    # (does that mean we need BeautifulSoup installed to use MechanicalSoup?)
+    # print(type(page.soup))
+
+    html = page.soup
+    # print(html)
+
+    # Submit a form with MechanicalSoup
+    # 1. Load a MechanicalSoup browser and open the login page
+    browser = mechanicalsoup.Browser()
+    url = "http://olympus.realpython.org/login"
+    login_page = browser.get(url)
+    login_html = login_page.soup
+
+    # 2. Select the form element and input the credentials into the input fields
+    form = login_html.select("form")[0]
+    form.select("input")[0]["value"] = "zeus"
+    form.select("input")[1]["value"] = "ThunderDude"
+
+    # 3. Submit the form to the login page's URL?
+    profiles_page = browser.submit(form, login_page.url)
+
+    # If the loging was successful, the url should be "http://olympus.realpython.org/profiles"
+    # If it didn't work, the url would still be "http://olympus.realpython.org/login"
+    # print(profiles_page.url)
+
+    # Get each profile link from the profiles page
+    links = profiles_page.soup.select("a")
+
+    base_url = "http://olympus.realpython.org"
+    for link in links:
+        address = base_url + link["href"]
+        text = link.text
+        # print(f"{text}: {address}")
+
+    # My answer for the "Check Your Understanding"
     pass
+    
+    # Intended solution for the "Check Your Understanding"
+
+
+
 
 # ------------------------------------ #
 
